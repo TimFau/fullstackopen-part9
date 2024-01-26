@@ -8,8 +8,12 @@ interface result {
     averageTime: Number,
 }
 
-const calculateExercises = (days: Array<Number>, target: Number): result => {
-    console.log(days, target)
+const calculateExercises = (target: Number, days: Array<Number>): (result | String) => {
+    if (Number.isNaN(target)) return 'Target is required and must be a number'
+    if (days.length < 1) return 'Days missing'
+    const hasNaN = days.filter((day) => Number.isNaN(day)).length
+    if (hasNaN) return 'Days must be numbers'
+
     const totalTime = days.reduce((accumulator, currentValue) => {
         return Number(accumulator) + Number(currentValue)
     }, 0)
@@ -44,12 +48,12 @@ const calculateExercises = (days: Array<Number>, target: Number): result => {
         ratingDescription: rating().description,
         averageTime
     }
-        
 }
 
-// const days: Array<Number> = JSON.parse(process.argv[2])
-// const target: Number = Number(process.argv[3])
+const target: Number = Number(process.argv[2])
+const days: Array<Number> = []
+for (let i = 3; i < process.argv.length; i++) {
+    days.push(Number(process.argv[i]))
+}
 
-// console.log(process.argv)
-
-console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2))
+console.log(calculateExercises(target, days))
