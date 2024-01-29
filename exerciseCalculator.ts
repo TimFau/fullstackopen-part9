@@ -32,12 +32,10 @@ const calculateExercises = (target: number, days: Array<number>): (result | stri
                 description: 'Not too bad, but could be better.'
             };
         }
-        if (Number(averageTime) >= Number(target)) {
-            return {
-                score: 1,
-                description: 'Great job! You reached your goal.'
-            };
-        }
+        return {
+            score: 1,
+            description: 'Great job! You reached your goal.'
+        };
     };
     return {
         periodLength: days.length,
@@ -57,3 +55,5 @@ for (let i = 3; i < process.argv.length; i++) {
 }
 
 console.log(calculateExercises(target, days));
+
+export default calculateExercises;
