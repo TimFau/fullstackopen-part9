@@ -1,5 +1,10 @@
 import express from "express";
 import patientService from "../services/patientService";
+import pino from "pino";
+import fs from "fs";
+import toNewPatient from "../utils";
+
+const logger = pino({}, fs.createWriteStream("log.json", { flags: "a" }));
 
 const router = express.Router();
 
@@ -7,8 +12,20 @@ router.get("/", (_req, res) => {
     res.send(patientService.getNonSensitivePatients());
 });
 
-router.post("/", (_req, res) => {
-    res.send("Adding patient");
+router.post("/", (req, res) => {
+    try {
+        const newPatient = toNewPatient(req.body);
+        const addedPatient = patientService.addPatient(newPatient);
+        logger.info("Adding Patient");
+        // logger.info(req.body);
+        res.json(addedPatient);
+    } catch (error: unknown) {
+        let errorMessage = 'Something went wrong.';
+        if (error instanceof Error) {
+            errorMessage += ' Error: ' + error.message;
+        }
+        res.status(400).send(errorMessage);
+    }
 });
 
 export default router;
