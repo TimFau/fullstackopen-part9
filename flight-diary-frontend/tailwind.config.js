@@ -5,7 +5,11 @@ export default {
     './src/index.css',
   ],
   theme: {
-    extend: {},
+    extend: {
+      spacing: {
+        'inline-input': '120px'
+      }
+    },
   },
   variants: {
     borderWidth: ['responsive', 'last']

@@ -21,6 +21,7 @@ const Diaries = () => {
     )
     return (
         <div className="diaries-container">
+            <h2 className="text-2xl border-b-2 mt-6 mb-4 pb-4">Diary Entries</h2>
             {diaries.map((diary: DiaryEntry, index) => <DiaryCard diary={diary} key={index} />)}
         </div>
     )
