@@ -23,3 +23,8 @@ export interface DiaryEntry {
 }
 
 export type NewDiaryEntry = Omit<DiaryEntry, 'id'>;
+
+export interface ValidationItem {
+    msg: string;
+    type: 'error' | 'success';
+}

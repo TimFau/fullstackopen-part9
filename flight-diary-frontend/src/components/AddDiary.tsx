@@ -1,31 +1,57 @@
 import { FormEvent, useState } from 'react';
 import DiaryService from './../services/diaries';
-import { NewDiaryEntry, Weather, Visibility } from '../types';
+import { NewDiaryEntry, Weather, Visibility, ValidationItem } from '../types';
 
 const AddDiary = () => {
     const [date, setDate] = useState('');
     const [visibility, setVisibility] = useState('');
     const [weather, setWeather] = useState('');
     const [comment, setComment] = useState('');
-    const [msg, setMsg] = useState('');
+    const [msgs, setMsgs] = useState<ValidationItem[]>([]);
+
+    const handleAddDiaryValidation = () => {
+        const validationMessages: ValidationItem[] = []
+        if (!date) {
+            validationMessages.push({msg: 'Date is required', type: 'error'});
+        }
+        if (!visibility) {
+            validationMessages.push({msg: 'Visibility is required', type: 'error'});
+        }
+        if (!weather) {
+            validationMessages.push({msg: 'Weather is required', type: 'error'});
+        }
+        if (!date || !visibility || !weather) {
+            handleSetMsgs(validationMessages);
+            return false;
+        }
+        return true;
+    }
 
     const handleAddDiary = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const newDiary = { date, visibility: visibility as Visibility, weather: weather as Weather, comment };
-        DiaryService.addDiary(newDiary).then((data: NewDiaryEntry) => {
-            console.log(data);
+        if (!handleAddDiaryValidation()) {
+            return false;
+        }
+        DiaryService.addDiary(newDiary).then(() => {
             handleOnSuccess();
-        }).catch((error) => {
+        }).catch(error => {
             // console.error('error', error);
-            setMsg(error?.message);
+            let responseError = error.response?.data || false
+            if (responseError) {
+                responseError = responseError.replace('Something went wrong. Error: ', '')
+                setMsgs([{ msg: responseError, type: 'error' }])
+            } else {
+                setMsgs([error?.message]);
+            }
         })
     }
 
-    const handleSetMsg = (msg: string) => {
-        setMsg(msg);
+    const handleSetMsgs = (msgs: ValidationItem[]) => {
+        setMsgs(msgs);
         setTimeout(() => {
-            setMsg('')
-        }, 3000)
+            setMsgs([])
+        }, 6000)
     }
 
     const handleOnSuccess = () => {
@@ -33,15 +59,20 @@ const AddDiary = () => {
         setVisibility('');
         setWeather('');
         setComment('');
-        handleSetMsg('Diary added!');
+        handleSetMsgs([{msg: 'Diary added!', type: 'success'}]);
     }
 
     return (
         <>
             <h2 className="text-2xl border-b-2 mb-4 pb-2">Add New Diary</h2>
-            {msg && 
-                <div className="block bg-white text-black p-2 mb-4">{msg}</div>
-            }
+            {msgs.map(( item: ValidationItem, index ) => (
+                    <div
+                        className={`block text-black p-2 mb-4 ${item.type === 'success' ? 'bg-success' : 'bg-error'}`}
+                        key={index}
+                    >
+                        {item.msg}
+                    </div>
+            ))}
             <form onSubmit={handleAddDiary}>
                 <label htmlFor="date" className="block pb-4 flex">
                     <span className="pr-4 inline-block min-w-inline-input">Date:</span>

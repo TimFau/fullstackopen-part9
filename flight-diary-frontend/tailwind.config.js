@@ -8,6 +8,10 @@ export default {
     extend: {
       spacing: {
         'inline-input': '120px'
+      },
+      colors: {
+        'success': '#99ffd6',
+        'error': '#ff9999'
       }
     },
   },
