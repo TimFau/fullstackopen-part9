@@ -78,14 +78,44 @@ const AddDiary = () => {
                     <span className="pr-4 inline-block min-w-inline-input">Date:</span>
                     <input type="date" id="date" name="date" className="flex-grow" value={date} onChange={(e) => setDate(e.target.value)}></input>
                 </label>
-                <label htmlFor="visibility" className="block pb-4 flex">
+                <div className="block pb-4 flex">
                     <span className="pr-4 inline-block min-w-inline-input">Visibility:</span>
-                    <input type="text" id="visibility" name="visibility" className="flex-grow" value={visibility} onChange={(e) => setVisibility(e.target.value)}></input>
-                </label>
-                <label htmlFor="weather" className="block pb-4 flex">
+                    <div>
+                        {Object.values(Visibility).map((visibilityOption) => (
+                            <label key={visibilityOption} className="block" htmlFor={`${visibilityOption}Visibility`}>
+                                <input 
+                                    type="radio"
+                                    id={`${visibilityOption}Visibility`}
+                                    name={`${visibilityOption}Visibility`}
+                                    className="pr-2"
+                                    value={visibilityOption}
+                                    checked={visibility === visibilityOption}
+                                    onChange={(e) => setVisibility(e.target.value as Visibility)}
+                                />
+                                <span className="pl-2 capitalize">{visibilityOption}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+                <div className="block pb-4 flex">
                     <span className="pr-4 inline-block min-w-inline-input">Weather:</span>
-                    <input type="text" id="weather" name="weather" className="flex-grow" value={weather} onChange={(e) => setWeather(e.target.value)}></input>
-                </label>
+                    <div>
+                        {Object.values(Weather).map((weatherOption) => (
+                            <label key={weatherOption} className="block">
+                                <input
+                                    type="radio"
+                                    id={`${weatherOption}Weather`}
+                                    name={`${weatherOption}Weather`}
+                                    className="pr-2"
+                                    value={weatherOption}
+                                    checked={weather === weatherOption}
+                                    onChange={(e) => setWeather(e.target.value as Weather)}
+                                />
+                                <span className="pl-2 capitalize">{weatherOption}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
                 <label htmlFor="comment" className="block pb-4 flex">
                     <span className="pr-4 inline-block min-w-inline-input">Comment:</span>
                     <textarea id="comment" name="comment" className="flex-grow" value={comment} onChange={(e) => setComment(e.target.value)}></textarea>
