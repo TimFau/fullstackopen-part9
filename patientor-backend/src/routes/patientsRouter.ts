@@ -13,7 +13,7 @@ router.get("/", (_req, res) => {
 });
 
 router.get("/:id", (req, res) => {
-    res.send(patientService.getNonSensitivePatient(req.params.id));
+    res.send(patientService.getPatient(req.params.id));
 });
 
 router.post("/", (req, res) => {
