@@ -69,7 +69,7 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
         <TableBody>
           {Object.values(patients).map((patient: Patient) => (
             <TableRow key={patient.id}>
-              <TableCell onClick={() => navigate(`/${patient.id}`)}>{patient.name}</TableCell>
+              <TableCell onClick={() => navigate(`/${patient.id}`)} sx={{ cursor: 'pointer' }}>{patient.name}</TableCell>
               <TableCell>{patient.gender}</TableCell>
               <TableCell>{patient.occupation}</TableCell>
               <TableCell>
