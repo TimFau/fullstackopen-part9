@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import patientService from "../../services/patients";
+import diagnosesService from "../../services/diagnoses";
 import { useParams } from "react-router-dom";
-import { Patient, Entry } from "./../../types";
+import { Patient, Entry, Diagnosis } from "./../../types";
 import { Male as MaleIcon, Female as FemaleIcon } from '@mui/icons-material';
 import { Card, CardContent } from "@mui/material";
 
 const PatientPage = () => {
     const [patient, setPatient] = useState<Patient>();
+    const [diagnoses, setDiagnoses] = useState<Diagnosis[]>();
     const { id } = useParams();
 
     useEffect(() => {
         const fetchPatient = async () => {
             const patient = await patientService.getOne(id || '');
             setPatient(patient);
+            const diagnoses = await diagnosesService.getAll();
+            setDiagnoses(diagnoses);
         };
         fetchPatient();
     }, [id]);
@@ -20,7 +24,6 @@ const PatientPage = () => {
     if (!patient) {
         return <div>Loading...</div>;
     }
-    console.log('patient', patient);
     return (
         <>
             <h1>{patient.name} <span>{patient.gender === "male" ? <MaleIcon /> : <FemaleIcon />}</span></h1>
@@ -37,7 +40,7 @@ const PatientPage = () => {
                             <h4>Diagnosis Codes</h4>
                             <ul>
                                 {entry.diagnosisCodes?.map(code => (
-                                    <li key={code}>{code}</li>
+                                    <li key={code}>{code} - {diagnoses?.find((diagnosis: Diagnosis) => diagnosis.code === code)?.name}</li>
                                 ))}
                             </ul>
                             </>
