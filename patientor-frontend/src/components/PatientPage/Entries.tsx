@@ -16,7 +16,7 @@ interface HospitalEntryProps extends EntryBaseProps {
 }
 
 export const HospitalEntry = ({ entry, diagnoses }: HospitalEntryProps) => {
-    console.log('HospitalEntry', entry);
+    // console.log('HospitalEntry', entry);
     if ('discharge' in entry) {
         return (
             <Card key={entry.id} sx={{ marginBottom: '15px' }}>
@@ -43,7 +43,7 @@ export const HospitalEntry = ({ entry, diagnoses }: HospitalEntryProps) => {
 };
 
 export const OccupationalEntry = ({ entry }: EntryBaseProps) => {
-    console.log('OccupationalEntry', entry);
+    // console.log('OccupationalEntry', entry);
     if ('employerName' in entry) {
         return(
             <Card key={entry.id} sx={{ marginBottom: '15px' }}>
@@ -58,7 +58,7 @@ export const OccupationalEntry = ({ entry }: EntryBaseProps) => {
 };
 
 export const HealthCheckEntry = ({ entry }: EntryBaseProps) => {
-    console.log('HealthCheckEntry', entry);
+    // console.log('HealthCheckEntry', entry);
     if ('healthCheckRating' in entry) {
         const healthCheckRatingColor = () => {
             switch (entry.healthCheckRating) {
