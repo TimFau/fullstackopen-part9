@@ -2,7 +2,7 @@ import express from "express";
 import patientService from "../services/patientService";
 import pino from "pino";
 import fs from "fs";
-import toNewPatient from "../utils";
+import { toNewPatient, toNewEntry } from "../utils";
 
 const logger = pino({}, fs.createWriteStream("log.json", { flags: "a" }));
 
@@ -23,6 +23,21 @@ router.post("/", (req, res) => {
         logger.info("Adding Patient");
         // logger.info(req.body);
         res.json(addedPatient);
+    } catch (error: unknown) {
+        let errorMessage = 'Something went wrong.';
+        if (error instanceof Error) {
+            errorMessage += ' Error: ' + error.message;
+        }
+        res.status(400).send(errorMessage);
+    }
+});
+
+router.post("/:id/entries", (req, res) => {
+    try {
+        const newEntry = toNewEntry(req.body);
+        logger.info("Adding Entry");
+        // logger.info(req.body);
+        res.json(newEntry);
     } catch (error: unknown) {
         let errorMessage = 'Something went wrong.';
         if (error instanceof Error) {
