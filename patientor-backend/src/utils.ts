@@ -1,4 +1,4 @@
-import { NewPatient, Gender, Entry, EntryWithoutId, HealthCheckRating } from "./types";
+import { NewPatient, Gender, Entry, EntryWithoutId, HealthCheckRating, Diagnosis, SickLeave, Discharge } from "./types";
 
 const isString = (text: unknown): text is string => {
     return typeof text === 'string' || text instanceof String;
@@ -44,6 +44,45 @@ const parseEntries = (array: unknown): Entry[] => {
     return array as Entry[];
 };
 
+const parseDiagnosisCodes = (object: unknown): Array<Diagnosis['code']> => {
+    if (!object || typeof object !== 'object' || !('diagnosisCodes' in object)) {
+        return [] as Array<Diagnosis['code']>;
+    }
+    return object.diagnosisCodes as Array<Diagnosis['code']>;
+};
+
+const parseSickLeave = (object: unknown): SickLeave => {
+    if (
+        !object || typeof object !== 'object' ||
+        !('startDate' in object) ||
+        !('endDate' in object) ||
+        !isString(object.startDate) ||
+        !isString(object.endDate)
+    ){
+        throw new Error ("Incorrect or missing sick leave");
+    }
+    return {
+        startDate: object.startDate,
+        endDate: object.endDate
+    } as SickLeave;
+};
+
+const parseDischarge = (object: unknown): Discharge => {
+    if (
+        !object || typeof object !== 'object' ||
+        !('date' in object) ||
+        !('criteria' in object) ||
+        !isString(object.date) ||
+        !isString(object.criteria)
+    ) {
+        throw new Error ("Incorrect or missing discharge");
+    }
+    return {
+        date: object.date,
+        criteria: object.criteria
+    };
+};
+
 export const toNewPatient = (object: unknown): NewPatient => {
     if ( !object || typeof object !== 'object' ) {
         throw new Error('Incorrect or missing data');
@@ -68,37 +107,36 @@ export const toNewEntry = (object: unknown): EntryWithoutId => {
     if ( !object || typeof object !== 'object' ) {
         throw new Error('Incorrect or missing data');
     }
-    if ('id' in object && 'description' in object && 'date' in object && 'specialist' in object && 'type' in object) {
+    if ('description' in object && 'date' in object && 'specialist' in object && 'type' in object) {
         const newEntryBase = {
             description: parseString(object.description),
             date: parseDate(object.date),
             specialist: parseString(object.specialist),
-            diagnosisCodes: 'diagnosisCodes' in object ? object.diagnosisCodes as string[] : undefined
+            diagnosisCodes: [] as Array<Diagnosis['code']>
         };
+        if ('diagnosisCodes' in object) {
+            newEntryBase.diagnosisCodes = parseDiagnosisCodes(object.diagnosisCodes);
+        }
         switch (object.type) {
             case "HealthCheck":
                 return {
-                    healthCheckRating: 'healthCheckRating' in object ? object.healthCheckRating as HealthCheckRating: 0 as HealthCheckRating,
-                    type: "HealthCheck" as const,
+                    healthCheckRating: 'healthCheckRating' in object ? object.healthCheckRating as HealthCheckRating : 0 as HealthCheckRating,
+                    type: "HealthCheck",
                     ...newEntryBase
                 };
             case "OccupationalHealthcare":
                 return {
                     employerName: 'employerName' in object ? parseString(object.employerName) : '',
-                    sickLeave: {
-                        startDate: parseDate('startDate' in object ? object.startDate: ''),
-                        endDate: parseDate('endDate' in object ? object.endDate : '')
-                    },
-                    type: "OccupationalHealthcare" as const,
+                    ...('sickLeave' in object ? {
+                        sickLeave: parseSickLeave(object.sickLeave)
+                    } : {}),
+                    type: "OccupationalHealthcare",
                     ...newEntryBase
                 };
             case "Hospital":
                 return {
-                    discharge: {
-                        date: parseDate(object.date),
-                        criteria: parseString('criteria' in object ? object.criteria : '')
-                    },
-                    type: "Hospital" as const,
+                    discharge: parseDischarge('discharge' in object ? object.discharge : null),
+                    type: "Hospital",
                     ...newEntryBase
                 };
             default:
