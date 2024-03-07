@@ -6,6 +6,7 @@ import { Patient, Entry, Diagnosis } from "./../../types";
 import { HealthCheckEntry, HospitalEntry, OccupationalEntry } from "./Entries";
 
 import { Male as MaleIcon, Female as FemaleIcon } from '@mui/icons-material';
+import NewEntry from "./NewEntry";
 
 const PatientPage = () => {
     const [patient, setPatient] = useState<Patient>();
@@ -47,6 +48,7 @@ const PatientPage = () => {
             {Array.isArray(patient.entries) && patient.entries.map((entry: Entry) => (
                 <EntryDetails entry={entry} key={entry.id} />
             ))}
+            <NewEntry />
         </>
     );
 };
