@@ -48,7 +48,7 @@ const PatientPage = () => {
             {Array.isArray(patient.entries) && patient.entries.map((entry: Entry) => (
                 <EntryDetails entry={entry} key={entry.id} />
             ))}
-            <NewEntry />
+            <NewEntry patientId={patient.id} />
         </>
     );
 };
