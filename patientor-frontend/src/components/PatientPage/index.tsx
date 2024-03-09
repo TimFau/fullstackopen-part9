@@ -23,6 +23,17 @@ const PatientPage = () => {
         fetchPatient();
     }, [id]);
 
+    const onNewEntry = (entry: Entry) => {
+        console.log('onNewEntry', entry);
+        if (entry && patient) {
+            const updatedPatient = {
+                ...patient,
+                entries: patient.entries.concat(entry)
+            };
+            setPatient(updatedPatient);
+        }
+    };
+
     const EntryDetails: React.FC<{ entry: Entry }> = ({ entry }) => {
         switch (entry.type) {
             case "Hospital":
@@ -48,7 +59,7 @@ const PatientPage = () => {
             {Array.isArray(patient.entries) && patient.entries.map((entry: Entry) => (
                 <EntryDetails entry={entry} key={entry.id} />
             ))}
-            <NewEntry patientId={patient.id} />
+            <NewEntry patientId={patient.id} onNewEntry={(entry: Entry) => onNewEntry(entry)} />
         </>
     );
 };

@@ -1,12 +1,14 @@
 import { Alert, Box, Button, TextField } from "@mui/material";
 import { useState } from "react";
 import patientsService from "./../../services/patients";
+import { Entry, HealthCheckRating } from "../../types";
 
 interface NewEntryProps {
-    patientId: string
+    patientId: string,
+    onNewEntry: (entry: Entry) => void
 }
 
-const NewEntry = ({ patientId }: NewEntryProps) => {
+const NewEntry = ({ patientId, onNewEntry }: NewEntryProps) => {
     const [showForm, setShowForm] = useState(false);
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
@@ -14,22 +16,55 @@ const NewEntry = ({ patientId }: NewEntryProps) => {
     const [diagnosisCodes, setDiagnosisCodes] = useState('');
     const [healthCheckRating, setHealthCheckRating] = useState('');
     const [error, setError] = useState(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
-        const entry = { description, date, specialist, diagnosisCodes, healthCheckRating, type: 'HealthCheck' };
-        console.log(patientId, entry);
-        patientsService.addPatientEntry(patientId, entry).catch((error) => setError(error.response.data));
+        setError(null);
+        setSuccess(null);
+        const entry = {
+            description,
+            date,
+            specialist,
+            diagnosisCodes: diagnosisCodes.split(',').map(code => code),
+            healthCheckRating: Number(healthCheckRating) as HealthCheckRating,
+            type: 'HealthCheck' as const
+        };
+        patientsService.addPatientEntry(patientId, entry).then((response) => {
+            console.log('response', response);
+            setSuccess('Entry Added!');
+            setDescription('');
+            setDate('');
+            setSpecialist('');
+            setDiagnosisCodes('');
+            setShowForm(false);
+            onNewEntry(response as Entry);
+            setTimeout(() => {
+                setSuccess(null);
+            }, 5000);
+        }).catch((error) => {
+            let errorMsg = error.response.data;
+            if (errorMsg.includes('Something went wrong. Error:')) {
+                errorMsg = errorMsg.split('Something went wrong. Error:')[1];
+            }
+            setError(errorMsg);
+            setTimeout(() => {
+                setError(null);
+            }, 5000);
+        });
     };
 
     return (
         <>
+            <Box mb={2}>
+                {error && <Alert severity="error">{error}</Alert>}
+                {success && <Alert severity="success">{success}</Alert>}
+            </Box>
             {!showForm &&
             <Button variant="contained" onClick={() => setShowForm(true)}>Add New Entry</Button>
             }
             {showForm &&
                 <>
-                {error && <Alert severity="error">{error}</Alert>}
                 <Box component="form" display="flex" flexDirection="column" gap={2} onSubmit={handleSubmit}>
                     <TextField label="description" value={description} onChange={(e) => setDescription(e.target.value)} />
                     <TextField label="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
