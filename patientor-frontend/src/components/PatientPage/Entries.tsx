@@ -9,10 +9,11 @@ import { Diagnosis, Entry } from "../../types";
 
 interface EntryBaseProps {
     entry: Entry;
+    diagnoses: Diagnosis[];
 }
 
 interface HospitalEntryProps extends EntryBaseProps {
-    diagnoses: Diagnosis[];
+
 }
 
 export const HospitalEntry = ({ entry, diagnoses }: HospitalEntryProps) => {
@@ -24,7 +25,7 @@ export const HospitalEntry = ({ entry, diagnoses }: HospitalEntryProps) => {
                     <strong>{entry.date} <LocalHospitalIcon /></strong>
                     <p>{entry.description}</p>
                     <p>Discharged {entry.discharge?.date} - {entry.discharge?.criteria}</p>
-                    <p>Diagnose by {entry.specialist}</p>
+                    <p>Diagnosed by {entry.specialist}</p>
                     {'diagnosisCodes' in entry &&
                         <>
                         <h4>Diagnosis Codes</h4>
@@ -42,8 +43,9 @@ export const HospitalEntry = ({ entry, diagnoses }: HospitalEntryProps) => {
     }
 };
 
-export const OccupationalEntry = ({ entry }: EntryBaseProps) => {
+export const OccupationalEntry = ({ entry, diagnoses }: EntryBaseProps) => {
     // console.log('OccupationalEntry', entry);
+    const sickLeave = 'sickLeave' in entry ? entry.sickLeave : null;
     if ('employerName' in entry) {
         return(
             <Card key={entry.id} sx={{ marginBottom: '15px' }}>
@@ -51,13 +53,33 @@ export const OccupationalEntry = ({ entry }: EntryBaseProps) => {
                     <strong>{entry.date} <WorkIcon /> {entry.employerName}</strong>
                     <p>{entry.description}</p>
                     <p>Diagnose by {entry.specialist}</p>
+                    {'diagnosisCodes' in entry &&
+                        <>
+                        <h4>Diagnosis Codes</h4>
+                        <ul>
+                            {entry.diagnosisCodes?.map(code => (
+                                <li key={code}>{code} - {diagnoses?.find((diagnosis: Diagnosis) => diagnosis.code === code)?.name}</li>
+                            ))}
+                        </ul>
+                        </>
+    
+                    }
+                    {sickLeave &&
+                        <>
+                        <h4>Sick Leave</h4>
+                        <ul>
+                            <li>Start: {sickLeave.startDate}</li>
+                            <li>End: {sickLeave.endDate}</li>
+                        </ul>
+                        </>
+                    }
                 </CardContent>
             </Card>
         );
     }
 };
 
-export const HealthCheckEntry = ({ entry }: EntryBaseProps) => {
+export const HealthCheckEntry = ({ entry, diagnoses }: EntryBaseProps) => {
     // console.log('HealthCheckEntry', entry);
     if ('healthCheckRating' in entry) {
         const healthCheckRatingColor = () => {
@@ -80,6 +102,17 @@ export const HealthCheckEntry = ({ entry }: EntryBaseProps) => {
                     <p>{entry.description}</p>
                     <HeartIcon color={healthCheckRatingColor()} />
                     <p>Diagnose by {entry.specialist}</p>
+                    {'diagnosisCodes' in entry &&
+                        <>
+                        <h4>Diagnosis Codes</h4>
+                        <ul>
+                            {entry.diagnosisCodes?.map(code => (
+                                <li key={code}>{code} - {diagnoses?.find((diagnosis: Diagnosis) => diagnosis.code === code)?.name}</li>
+                            ))}
+                        </ul>
+                        </>
+    
+                    }
                 </CardContent>
             </Card>
         );
