@@ -34,22 +34,23 @@ const PatientPage = () => {
         }
     };
 
+    if (!patient || !diagnoses) {
+        return <div>Loading...</div>;
+    }
+
     const EntryDetails: React.FC<{ entry: Entry }> = ({ entry }) => {
         switch (entry.type) {
             case "Hospital":
                 return <HospitalEntry entry={entry} diagnoses={diagnoses} />;
             case "OccupationalHealthcare":
-                return <OccupationalEntry entry={entry} />;
+                return <OccupationalEntry entry={entry} diagnoses={diagnoses} />;
             case "HealthCheck":
-                return <HealthCheckEntry entry={entry} />;
+                return <HealthCheckEntry entry={entry} diagnoses={diagnoses} />;
             default:
                 return null;
         }
     };
 
-    if (!patient) {
-        return <div>Loading...</div>;
-    }
     return (
         <>
             <h1>{patient.name} <span>{patient.gender === "male" ? <MaleIcon /> : <FemaleIcon />}</span></h1>
@@ -59,7 +60,7 @@ const PatientPage = () => {
             {Array.isArray(patient.entries) && patient.entries.map((entry: Entry) => (
                 <EntryDetails entry={entry} key={entry.id} />
             ))}
-            <NewEntry patientId={patient.id} onNewEntry={(entry: Entry) => onNewEntry(entry)} />
+            <NewEntry patientId={patient.id} diagnoses={diagnoses} onNewEntry={(entry: Entry) => onNewEntry(entry)} />
         </>
     );
 };

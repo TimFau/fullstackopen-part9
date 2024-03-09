@@ -115,7 +115,7 @@ export const toNewEntry = (object: unknown): EntryWithoutId => {
             diagnosisCodes: [] as Array<Diagnosis['code']>
         };
         if ('diagnosisCodes' in object) {
-            newEntryBase.diagnosisCodes = parseDiagnosisCodes(object.diagnosisCodes);
+            newEntryBase.diagnosisCodes = parseDiagnosisCodes(object);
         }
         switch (object.type) {
             case "HealthCheck":

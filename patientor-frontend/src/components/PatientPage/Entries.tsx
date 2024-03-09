@@ -12,11 +12,22 @@ interface EntryBaseProps {
     diagnoses: Diagnosis[];
 }
 
-interface HospitalEntryProps extends EntryBaseProps {
+const Diagnoses = ({ entry, diagnoses }: EntryBaseProps) => {
+    if ('diagnosisCodes' in entry && entry.diagnosisCodes && entry.diagnosisCodes?.length > 0) {
+        return (
+            <>
+                <h4>Diagnosis Codes</h4>
+                <ul>
+                    {entry.diagnosisCodes?.map(code => (
+                        <li key={code}>{code} - {diagnoses?.find((diagnosis: Diagnosis) => diagnosis.code === code)?.name}</li>
+                    ))}
+                </ul>
+            </>
+        );
+    }
+};
 
-}
-
-export const HospitalEntry = ({ entry, diagnoses }: HospitalEntryProps) => {
+export const HospitalEntry = ({ entry, diagnoses }: EntryBaseProps) => {
     // console.log('HospitalEntry', entry);
     if ('discharge' in entry) {
         return (
@@ -26,17 +37,7 @@ export const HospitalEntry = ({ entry, diagnoses }: HospitalEntryProps) => {
                     <p>{entry.description}</p>
                     <p>Discharged {entry.discharge?.date} - {entry.discharge?.criteria}</p>
                     <p>Diagnosed by {entry.specialist}</p>
-                    {'diagnosisCodes' in entry &&
-                        <>
-                        <h4>Diagnosis Codes</h4>
-                        <ul>
-                            {entry.diagnosisCodes?.map(code => (
-                                <li key={code}>{code} - {diagnoses?.find((diagnosis: Diagnosis) => diagnosis.code === code)?.name}</li>
-                            ))}
-                        </ul>
-                        </>
-    
-                    }
+                    <Diagnoses entry={entry} diagnoses={diagnoses} />
                 </CardContent>
             </Card>
         );
@@ -53,17 +54,7 @@ export const OccupationalEntry = ({ entry, diagnoses }: EntryBaseProps) => {
                     <strong>{entry.date} <WorkIcon /> {entry.employerName}</strong>
                     <p>{entry.description}</p>
                     <p>Diagnose by {entry.specialist}</p>
-                    {'diagnosisCodes' in entry &&
-                        <>
-                        <h4>Diagnosis Codes</h4>
-                        <ul>
-                            {entry.diagnosisCodes?.map(code => (
-                                <li key={code}>{code} - {diagnoses?.find((diagnosis: Diagnosis) => diagnosis.code === code)?.name}</li>
-                            ))}
-                        </ul>
-                        </>
-    
-                    }
+                    <Diagnoses entry={entry} diagnoses={diagnoses} />
                     {sickLeave &&
                         <>
                         <h4>Sick Leave</h4>
@@ -102,17 +93,7 @@ export const HealthCheckEntry = ({ entry, diagnoses }: EntryBaseProps) => {
                     <p>{entry.description}</p>
                     <HeartIcon color={healthCheckRatingColor()} />
                     <p>Diagnose by {entry.specialist}</p>
-                    {'diagnosisCodes' in entry &&
-                        <>
-                        <h4>Diagnosis Codes</h4>
-                        <ul>
-                            {entry.diagnosisCodes?.map(code => (
-                                <li key={code}>{code} - {diagnoses?.find((diagnosis: Diagnosis) => diagnosis.code === code)?.name}</li>
-                            ))}
-                        </ul>
-                        </>
-    
-                    }
+                    <Diagnoses entry={entry} diagnoses={diagnoses} />
                 </CardContent>
             </Card>
         );

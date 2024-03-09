@@ -1,19 +1,20 @@
-import { Alert, Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Alert, Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import { useState } from "react";
 import patientsService from "./../../services/patients";
-import { Entry, EntryWithoutId, HealthCheckRating } from "../../types";
+import { Entry, EntryWithoutId, HealthCheckRating, Diagnosis } from "../../types";
 
 interface NewEntryProps {
     patientId: string,
+    diagnoses: Diagnosis[],
     onNewEntry: (entry: Entry) => void
 }
 
-const NewEntry = ({ patientId, onNewEntry }: NewEntryProps) => {
+const NewEntry = ({ patientId, diagnoses, onNewEntry }: NewEntryProps) => {
     const [showForm, setShowForm] = useState(false);
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
     const [specialist, setSpecialist] = useState('');
-    const [diagnosisCodes, setDiagnosisCodes] = useState('');
+    const [diagnosisCodes, setDiagnosisCodes] = useState<string[]>([]);
     const [type, setType] = useState('');
     const [healthCheckRating, setHealthCheckRating] = useState('');
     const [employerName, setEmployerName] = useState('');
@@ -24,6 +25,20 @@ const NewEntry = ({ patientId, onNewEntry }: NewEntryProps) => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState<string | null>(null);
 
+    const resetForm = () => {
+        setDescription('');
+        setDate('');
+        setSpecialist('');
+        setDiagnosisCodes([]);
+        setType('');
+        setHealthCheckRating('');
+        setEmployerName('');
+        setSickLeaveStartDate('');
+        setSickLeaveEndDate('');
+        setDischargeDate('');
+        setDischargeCriteria('');
+    };
+
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
         setError(null);
@@ -32,7 +47,7 @@ const NewEntry = ({ patientId, onNewEntry }: NewEntryProps) => {
             description,
             date,
             specialist,
-            diagnosisCodes: diagnosisCodes.split(',').map(code => code)
+            diagnosisCodes
         };
         let entry: EntryWithoutId;
         switch (type) {
@@ -70,10 +85,7 @@ const NewEntry = ({ patientId, onNewEntry }: NewEntryProps) => {
         patientsService.addPatientEntry(patientId, entry).then((response) => {
             console.log('response', response);
             setSuccess('Entry Added!');
-            setDescription('');
-            setDate('');
-            setSpecialist('');
-            setDiagnosisCodes('');
+            resetForm();
             setShowForm(false);
             onNewEntry(response as Entry);
             setTimeout(() => {
@@ -91,6 +103,15 @@ const NewEntry = ({ patientId, onNewEntry }: NewEntryProps) => {
         });
     };
 
+    const handleSetDiagnosesCodes = (e: SelectChangeEvent<typeof diagnosisCodes>) => {
+        const {
+            target: { value }
+        } = e;
+        setDiagnosisCodes(
+            typeof value === 'string' ? value.split(',') : value
+        );
+    };
+
     return (
         <>
             <Box mb={2}>
@@ -103,10 +124,17 @@ const NewEntry = ({ patientId, onNewEntry }: NewEntryProps) => {
             {showForm &&
                 <>
                 <Box component="form" display="flex" flexDirection="column" gap={2} onSubmit={handleSubmit}>
-                    <TextField label="description" value={description} onChange={(e) => setDescription(e.target.value)} />
-                    <TextField label="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                    <TextField label="specialist" value={specialist} onChange={(e) => setSpecialist(e.target.value)} />
-                    <TextField label="diagnosisCodes" helperText="Enter diagnosis codes, separated by a comma." value={diagnosisCodes} onChange={(e) => setDiagnosisCodes(e.target.value)} />
+                    <TextField label="description" value={description} required onChange={(e) => setDescription(e.target.value)} />
+                    <TextField label="date" type="date" value={date} required onChange={(e) => setDate(e.target.value)} InputLabelProps={{ shrink: true}}/>
+                    <TextField label="specialist" value={specialist} required onChange={(e) => setSpecialist(e.target.value)} />
+                    <FormControl>
+                        <InputLabel id="type">Diagnoses</InputLabel>
+                        <Select multiple value={diagnosisCodes} onChange={(e) => handleSetDiagnosesCodes(e)}>
+                            {diagnoses.map((diagnosis) => (
+                                <MenuItem key={diagnosis.code} value={diagnosis.code}>{diagnosis.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                     <FormControl>
                         <InputLabel id="type">Type</InputLabel>
                         <Select labelId="type" label="type" value={type} onChange={(e) => setType(e.target.value)}>
@@ -116,20 +144,28 @@ const NewEntry = ({ patientId, onNewEntry }: NewEntryProps) => {
                         </Select>
                     </FormControl>
                     {type === "HealthCheck" &&
-                        <TextField label="healthCheckRating" type="number" value={healthCheckRating} onChange={(e) => setHealthCheckRating(e.target.value)} />
+                        <FormControl>
+                            <InputLabel id="type">HealthCheckRating</InputLabel>
+                            <Select label="healthCheckRating" type="number" value={healthCheckRating} onChange={(e) => setHealthCheckRating(e.target.value)}>
+                                <MenuItem value="0">Healthy</MenuItem>
+                                <MenuItem value="1">Low Risk</MenuItem>
+                                <MenuItem value="2">High Risk</MenuItem>
+                                <MenuItem value="3">Critical Risk</MenuItem>
+                            </Select>
+                        </FormControl>
                     }
                     {type === "OccupationalHealthcare" &&
                         <>
                             <TextField label="employerName" value={employerName} onChange={(e) => setEmployerName(e.target.value)} />
                             <span>Sick Leave</span>
-                            <TextField label="startDate" type="date" value={sickLeaveStartDate} onChange={(e) => setSickLeaveStartDate(e.target.value)} sx={{ marginLeft: 2 }} />
-                            <TextField label="endDate" type="date" value={sickLeaveEndDate} onChange={(e) => setSickLeaveEndDate(e.target.value)} sx={{ marginLeft: 2 }} />
+                            <TextField label="startDate" type="date" value={sickLeaveStartDate} onChange={(e) => setSickLeaveStartDate(e.target.value)} sx={{ marginLeft: 2 }} InputLabelProps={{ shrink: true}} />
+                            <TextField label="endDate" type="date" value={sickLeaveEndDate} onChange={(e) => setSickLeaveEndDate(e.target.value)} sx={{ marginLeft: 2 }} InputLabelProps={{ shrink: true}} />
                         </>
                     }
                     {type === "Hospital" &&
                         <Box display="flex" flexDirection="column" gap={2}>
                             <span>Discharge</span>
-                            <TextField label="date" type="date" value={dischargeDate} onChange={(e) => setDischargeDate(e.target.value)} sx={{ marginLeft: 2 }} />
+                            <TextField label="date" type="date" value={dischargeDate} onChange={(e) => setDischargeDate(e.target.value)} sx={{ marginLeft: 2 }} InputLabelProps={{ shrink: true}} />
                             <TextField label="criteria" value={dischargeCriteria} onChange={(e) => setDischargeCriteria(e.target.value)} sx={{ marginLeft: 2 }} />
                         </Box>
                     }
